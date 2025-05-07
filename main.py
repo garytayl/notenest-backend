@@ -10,13 +10,19 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+origins = [
+    "https://kzmgzrkje4v8sw6d91ko.lite.vusercontent.net",  # v0.dev deployment
+    "http://localhost:3000",  # optional: local testing
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # or specify your v0 URL instead of "*"
+    allow_origins=origins,  # use list, not "*"
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 app = FastAPI()
