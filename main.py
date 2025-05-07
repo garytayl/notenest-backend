@@ -58,12 +58,21 @@ from auth import verify_password
 
 @app.post("/signin")
 def signin(payload: SigninRequest, db: Session = Depends(get_db)):
+    print(f"Signin attempt for: {payload.email}")
+    
     user = db.query(User).filter(User.email == payload.email).first()
-    if not user or not verify_password(payload.password, user.hashed_password):
+    if not user:
+        print("User not found")
         raise HTTPException(status_code=401, detail="Invalid email or password.")
-
+    
+    if not verify_password(payload.password, user.hashed_password):
+        print("Incorrect password")
+        raise HTTPException(status_code=401, detail="Invalid email or password.")
+    
+    print("Signin successful")
     token = create_access_token({"sub": user.email})
     return {"access_token": token, "token_type": "bearer"}
+
 
 
 
