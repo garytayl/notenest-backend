@@ -2,32 +2,30 @@ from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from db import SessionLocal
+from db import SessionLocal, Base, engine
 from models import User
 from auth import hash_password, verify_password, create_access_token
-
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+# ✅ CORS setup – make sure it's AFTER the FastAPI() init and BEFORE routes
 origins = [
-    "https://kzmgzrkje4v8sw6d91ko.lite.vusercontent.net",  # v0.dev deployment
-    "http://localhost:3000",  # optional: local testing
+    "https://kzmgzrkje4v8sw6d91ko.lite.vusercontent.net",
+    "http://localhost:3000"
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # use list, not "*"
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# ✅ DB setup
+Base.metadata.create_all(bind=engine)
 
-
-app = FastAPI()
-
-# Dependency to get DB session
 def get_db():
     db = SessionLocal()
     try:
@@ -35,6 +33,7 @@ def get_db():
     finally:
         db.close()
 
+# ✅ Models
 class SignupRequest(BaseModel):
     email: str
     password: str
@@ -43,10 +42,9 @@ class SigninRequest(BaseModel):
     email: str
     password: str
 
-
+# ✅ Routes
 @app.post("/signup")
 def signup(payload: SignupRequest, db: Session = Depends(get_db)):
-    # Check if user already exists
     existing_user = db.query(User).filter(User.email == payload.email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered.")
@@ -60,29 +58,15 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
     token = create_access_token({"sub": new_user.email})
     return {"access_token": token, "token_type": "bearer"}
 
-from auth import verify_password
 
 @app.post("/signin")
 def signin(payload: SigninRequest, db: Session = Depends(get_db)):
     print(f"Signin attempt for: {payload.email}")
-    
     user = db.query(User).filter(User.email == payload.email).first()
-    if not user:
-        print("User not found")
+    if not user or not verify_password(payload.password, user.hashed_password):
+        print("Signin failed")
         raise HTTPException(status_code=401, detail="Invalid email or password.")
-    
-    if not verify_password(payload.password, user.hashed_password):
-        print("Incorrect password")
-        raise HTTPException(status_code=401, detail="Invalid email or password.")
-    
+
     print("Signin successful")
     token = create_access_token({"sub": user.email})
     return {"access_token": token, "token_type": "bearer"}
-
-
-
-
-from db import Base, engine
-from models import User
-
-Base.metadata.create_all(bind=engine)
