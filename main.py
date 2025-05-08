@@ -1,4 +1,6 @@
 import os
+os.makedirs("temp_audio", exist_ok=True)
+
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -144,12 +146,6 @@ async def upload_audio(file: UploadFile = File(...)):
     contents = await file.read()
     with open(f"temp_audio/{file.filename}", "wb") as f:
         f.write(contents)
-
-
-os.makedirs("temp_audio", exist_ok=True)
-
-app = FastAPI()
-
 
     return {"filename": file.filename, "message": "Upload successful"}
 
