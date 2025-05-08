@@ -92,3 +92,8 @@ def signin(payload: SigninRequest, db: Session = Depends(get_db)):
     print("Signin successful")
     token = create_access_token({"sub": user.email, "name": user.name})
     return {"access_token": token, "token_type": "bearer"}
+
+class NoteCreate(BaseModel):
+    title: str
+    content: Optional[str] = None
+
