@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -133,4 +134,22 @@ def get_notes(db: Session = Depends(get_db), authorization: str = Header(...)):
     return [{"id": note.id, "title": note.title, "content": note.content} for note in notes]
 
 
+from fastapi import File, UploadFile
+
+@app.post("/upload-audio")
+async def upload_audio(file: UploadFile = File(...)):
+    if file.content_type != "audio/mpeg":
+        raise HTTPException(status_code=400, detail="Only MP3 files allowed.")
+
+    contents = await file.read()
+    with open(f"temp_audio/{file.filename}", "wb") as f:
+        f.write(contents)
+
+
+os.makedirs("temp_audio", exist_ok=True)
+
+app = FastAPI()
+
+
+    return {"filename": file.filename, "message": "Upload successful"}
 
