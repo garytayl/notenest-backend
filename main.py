@@ -113,4 +113,17 @@ def create_note(payload: NoteCreate, db: Session = Depends(get_db), authorizatio
 
     return {"id": new_note.id, "title": new_note.title, "content": new_note.content}
 
+@app.get("/notes")
+def get_notes(db: Session = Depends(get_db), authorization: str = Header(...)):
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing token")
+
+    token = authorization.split(" ")[1]
+    user_data = decode_token(token)
+    user_email = user_data.get("sub")
+
+    notes = db.query(Note).filter(Note.email == user_email).all()
+
+    return [{"id": note.id, "title": note.title, "content": note.content} for note in notes]
+
 
