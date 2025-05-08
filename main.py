@@ -74,5 +74,5 @@ def signin(payload: SigninRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid email or password.")
 
     print("Signin successful")
-    token = create_access_token({"sub": new_user.email, "name": new_user.name})
+    token = create_access_token({"sub": user.email, "name": user.name})
     return {"access_token": token, "token_type": "bearer"}
