@@ -1,8 +1,8 @@
 import os
 os.makedirs("temp_audio", exist_ok=True)
 
-import whisper
-from fastapi import FastAPI, HTTPException, Depends
+import openai
+from fastapi import FastAPI, HTTPException, Depends, Form
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -148,8 +148,6 @@ async def upload_audio(file: UploadFile = File(...)):
     with open(f"temp_audio/{file.filename}", "wb") as f:
         f.write(contents)
 
-model = whisper.load_model("base")  # You can use "tiny", "base", "small", "medium", "large"
-
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.post("/transcribe")
@@ -160,6 +158,12 @@ async def transcribe_audio_api(filename: str = Form(...)):
         raise HTTPException(status_code=404, detail="File not found.")
 
     with open(filepath, "rb") as audio_file:
-        transcript = openai.Audio.transcribe("whisper-1", audio_file)
+        transcription = client.audio.transcriptions.create(
+            model="gpt-4o-mini-transcribe",
+            file=audio_file,
+            response_format="text",
+            prompt="This is a podcast with technical terms like Whisper, GPT-4o, and digital signal processing."
+        )
 
-    return {"transcription": transcript["text"]}
+    return {"transcription": transcription.text}
+
