@@ -1,6 +1,7 @@
 import os
 os.makedirs("temp_audio", exist_ok=True)
 
+import whisper
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -147,5 +148,18 @@ async def upload_audio(file: UploadFile = File(...)):
     with open(f"temp_audio/{file.filename}", "wb") as f:
         f.write(contents)
 
-    return {"filename": file.filename, "message": "Upload successful"}
+model = whisper.load_model("base")  # You can use "tiny", "base", "small", "medium", "large"
 
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+@app.post("/transcribe")
+async def transcribe_audio_api(filename: str = Form(...)):
+    filepath = os.path.join("temp_audio", filename)
+
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="File not found.")
+
+    with open(filepath, "rb") as audio_file:
+        transcript = openai.Audio.transcribe("whisper-1", audio_file)
+
+    return {"transcription": transcript["text"]}
