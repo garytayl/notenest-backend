@@ -148,6 +148,9 @@ async def upload_audio(file: UploadFile = File(...)):
     with open(f"temp_audio/{file.filename}", "wb") as f:
         f.write(contents)
 
+    return {"filename": file.filename, "message": "Upload successful"}
+
+
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.post("/transcribe")
