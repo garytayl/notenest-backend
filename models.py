@@ -4,8 +4,8 @@ from db import Base
 
 class User(Base):
     __tablename__ = "users"
-    
+
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    name = Column(String)  # ← This line is probably missing
+    email = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
