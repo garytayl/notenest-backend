@@ -33,6 +33,22 @@ def get_db():
     finally:
         db.close()
 
+from fastapi import Header
+from auth import decode_token
+
+@app.get("/me")
+def get_me(authorization: str = Header(...)):
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid authorization header")
+
+    token = authorization.split(" ")[1]
+    payload = decode_token(token)
+
+    return {
+        "email": payload.get("sub"),
+        "name": payload.get("name")
+    }
+
 # ✅ Models
 class SignupRequest(BaseModel):
     name: str
