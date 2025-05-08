@@ -18,7 +18,6 @@ app = FastAPI()
 origins = [
     "https://v0-note-nest-ui-design.vercel.app", 
     "http://localhost:3000"
-    "https://note-nest-frontend-xyz123.vercel.app"
 ]
 
 app.add_middleware(
