@@ -15,5 +15,7 @@ class Note(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, index=True)
-    filename = Column(String)
+    title = Column(String)  
+    content = Column(String)
+    filename = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
