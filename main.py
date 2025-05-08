@@ -52,7 +52,11 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email already registered.")
 
     hashed_pw = hash_password(payload.password)
-    new_user = User(email=payload.email, hashed_password=hashed_pw)
+    new_user = User(
+    name=payload.name,
+    email=payload.email,
+    hashed_password=hashed_pw
+)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
