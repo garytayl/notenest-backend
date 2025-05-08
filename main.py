@@ -173,6 +173,24 @@ async def transcribe_audio_api(filename: str = Form(...)):
             print(f"❌ OpenAI transcription failed: {e}")
             raise HTTPException(status_code=500, detail="OpenAI transcription failed.")
 
+@app.get("/notes/{note_id}")
+def get_note(note_id: int, db: Session = Depends(get_db), authorization: str = Header(...)):
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing token")
+
+    token = authorization.split(" ")[1]
+    user_data = decode_token(token)
+    user_email = user_data.get("sub")
+
+    note = db.query(Note).filter(Note.id == note_id, Note.email == user_email).first()
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+
+    return {
+        "id": note.id,
+        "filename": note.filename,  # or title/content if you changed your schema
+        "created_at": note.created_at
+    }
 
 
 
