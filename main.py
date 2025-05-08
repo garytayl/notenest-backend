@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from db import SessionLocal, Base, engine
-from models import User
+from models import User, Note
 from auth import hash_password, verify_password, create_access_token
 from fastapi.middleware.cors import CORSMiddleware
 
