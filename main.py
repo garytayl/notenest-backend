@@ -153,8 +153,7 @@ async def upload_audio(file: UploadFile = File(...)):
     return {"filename": file.filename, "message": "Upload successful"}
 
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.post("/transcribe")
 async def transcribe_audio_api(filename: str = Form(...)):
@@ -174,6 +173,7 @@ async def transcribe_audio_api(filename: str = Form(...)):
         except Exception as e:
             print(f"❌ OpenAI transcription failed: {e}")
             raise HTTPException(status_code=500, detail="OpenAI transcription failed.")
+
 
 
 
