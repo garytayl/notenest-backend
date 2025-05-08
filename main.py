@@ -1,7 +1,7 @@
 import os
 os.makedirs("temp_audio", exist_ok=True)
 
-import openai
+from openai import OpenAI
 from fastapi import FastAPI, HTTPException, Depends, Form
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -154,28 +154,26 @@ async def upload_audio(file: UploadFile = File(...)):
 
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI()
 
 @app.post("/transcribe")
 async def transcribe_audio_api(filename: str = Form(...)):
-    print(f"🔍 Received filename: {filename}")
     filepath = os.path.join("temp_audio", filename)
-    print(f"🔍 Full path: {filepath}")
-    
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File not found.")
-    
+
     with open(filepath, "rb") as audio_file:
         try:
-            transcription = openai.audio.transcriptions.create(
-                model="gpt-4o-mini-transcribe",
+            transcription = client.audio.transcriptions.create(
+                model="gpt-4o-transcribe",
                 file=audio_file,
                 response_format="text",
                 prompt="This is a podcast with technical terms like Whisper, GPT-4o, and digital signal processing."
             )
+            return {"transcription": transcription.text}
         except Exception as e:
             print(f"❌ OpenAI transcription failed: {e}")
             raise HTTPException(status_code=500, detail="OpenAI transcription failed.")
-    
-    return {"transcription": transcription.text}
+
 
 
