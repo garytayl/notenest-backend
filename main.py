@@ -61,7 +61,7 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    token = create_access_token({"sub": new_user.email})
+    token = create_access_token({"sub": new_user.email, "name": new_user.name})
     return {"access_token": token, "token_type": "bearer"}
 
 
@@ -74,5 +74,5 @@ def signin(payload: SigninRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid email or password.")
 
     print("Signin successful")
-    token = create_access_token({"sub": user.email})
+    token = create_access_token({"sub": new_user.email, "name": new_user.name})
     return {"access_token": token, "token_type": "bearer"}
