@@ -17,7 +17,6 @@ app = FastAPI()
 # ✅ CORS setup – make sure it's AFTER the FastAPI() init and BEFORE routes
 origins = [
     "https://v0-note-nest-ui-design.vercel.app",
-    "https://kzmq2o9jzrke6hhwgn68.lite.vusercontent.net",  # Add this!
     "http://localhost:3000",
 ]
 
