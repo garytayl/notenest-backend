@@ -169,7 +169,7 @@ async def transcribe_audio_api(filename: str = Form(...)):
                 response_format="text",
                 prompt="This is a podcast with technical terms like Whisper, GPT-4o, and digital signal processing."
             )
-            return {"transcription": transcription.text}
+            return {"transcription": transcription}
         except Exception as e:
             print(f"❌ OpenAI transcription failed: {e}")
             raise HTTPException(status_code=500, detail="OpenAI transcription failed.")
