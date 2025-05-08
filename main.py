@@ -35,10 +35,12 @@ def get_db():
 
 # ✅ Models
 class SignupRequest(BaseModel):
+    name: str
     email: str
     password: str
 
 class SigninRequest(BaseModel):
+    name: str
     email: str
     password: str
 
