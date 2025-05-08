@@ -16,13 +16,15 @@ app = FastAPI()
 
 # ✅ CORS setup – make sure it's AFTER the FastAPI() init and BEFORE routes
 origins = [
-    "https://v0-note-nest-ui-design.vercel.app", 
-    "http://localhost:3000"
+    "https://v0-note-nest-ui-design.vercel.app",
+    "https://kzmq2o9jzrke6hhwgn68.lite.vusercontent.net",  # Add this!
+    "http://localhost:3000",
 ]
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -155,18 +157,25 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.post("/transcribe")
 async def transcribe_audio_api(filename: str = Form(...)):
+    print(f"🔍 Received filename: {filename}")
     filepath = os.path.join("temp_audio", filename)
-
+    print(f"🔍 Full path: {filepath}")
+    
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File not found.")
-
+    
     with open(filepath, "rb") as audio_file:
-        transcription = openai.audio.transcriptions.create(
-            model="gpt-4o-mini-transcribe",
-            file=audio_file,
-            response_format="text",
-            prompt="This is a podcast with technical terms like Whisper, GPT-4o, and digital signal processing."
-        )
-
+        try:
+            transcription = openai.audio.transcriptions.create(
+                model="gpt-4o-mini-transcribe",
+                file=audio_file,
+                response_format="text",
+                prompt="This is a podcast with technical terms like Whisper, GPT-4o, and digital signal processing."
+            )
+        except Exception as e:
+            print(f"❌ OpenAI transcription failed: {e}")
+            raise HTTPException(status_code=500, detail="OpenAI transcription failed.")
+    
     return {"transcription": transcription.text}
+
 
