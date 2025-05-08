@@ -158,7 +158,7 @@ async def transcribe_audio_api(filename: str = Form(...)):
         raise HTTPException(status_code=404, detail="File not found.")
 
     with open(filepath, "rb") as audio_file:
-        transcription = client.audio.transcriptions.create(
+        transcription = openai.audio.transcriptions.create(
             model="gpt-4o-mini-transcribe",
             file=audio_file,
             response_format="text",
