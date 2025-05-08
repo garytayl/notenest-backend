@@ -97,3 +97,20 @@ class NoteCreate(BaseModel):
     title: str
     content: Optional[str] = None
 
+@app.post("/notes")
+def create_note(payload: NoteCreate, db: Session = Depends(get_db), authorization: str = Header(...)):
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing token")
+
+    token = authorization.split(" ")[1]
+    user_data = decode_token(token)
+    user_email = user_data.get("sub")
+
+    new_note = Note(title=payload.title, content=payload.content, email=user_email)
+    db.add(new_note)
+    db.commit()
+    db.refresh(new_note)
+
+    return {"id": new_note.id, "title": new_note.title, "content": new_note.content}
+
+
