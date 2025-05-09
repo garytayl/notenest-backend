@@ -190,7 +190,9 @@ def get_note(note_id: int, db: Session = Depends(get_db), authorization: str = H
         "content": note.content,
         "filename": note.filename,
         "created_at": note.created_at,
+        "email": note.email, 
     }
+
 
 
 
