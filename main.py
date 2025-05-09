@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException, Depends, Form
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import Optional
+from schemas import NoteResponse
 
 from db import SessionLocal, Base, engine
 from models import User, Note
@@ -173,11 +174,8 @@ async def transcribe_audio_api(filename: str = Form(...)):
             print(f"❌ OpenAI transcription failed: {e}")
             raise HTTPException(status_code=500, detail="OpenAI transcription failed.")
 
-@app.get("/notes/{note_id}")
+@app.get("/notes/{note_id}", response_model=NoteResponse)
 def get_note(note_id: int, db: Session = Depends(get_db), authorization: str = Header(...)):
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing token")
-
     token = authorization.split(" ")[1]
     user_data = decode_token(token)
     user_email = user_data.get("sub")
@@ -188,9 +186,12 @@ def get_note(note_id: int, db: Session = Depends(get_db), authorization: str = H
 
     return {
         "id": note.id,
-        "filename": note.filename,  # or title/content if you changed your schema
-        "created_at": note.created_at
+        "title": note.title,
+        "content": note.content,
+        "filename": note.filename,
+        "created_at": note.created_at,
     }
+
 
 
 
